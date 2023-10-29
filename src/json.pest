@@ -1,17 +1,13 @@
-WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+WHITESPACE = _{ " " | "\t" | "\r" }
 
-object = {
-    "{" ~ "}" |
-    "{" ~ pair ~ ("," ~ pair)* ~ "}"
-}
-pair = { string ~ ":" ~ value }
-
-array = {
-    "[" ~ "]" |
-    "[" ~ value ~ ("," ~ value)* ~ "]"
+object = _{
+    "{" ~ NEWLINE? ~ pairs ~ "}"
 }
 
-value = _{ object | array | string | number | boolean | null }
+pairs = { (pair)* }
+pair = { (keyword ~ NEWLINE) | (keyword ~ value ~ NEWLINE) | (keyword ~ keyword ~ object ~ NEWLINE) }
+
+value = _{ object | string| boolean | null | unquoted_string  }
 
 boolean = { "true" | "false" }
 
@@ -25,11 +21,13 @@ char = {
     | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
 }
 
-number = @{
-    "-"?
-    ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
-    ~ ("." ~ ASCII_DIGIT*)?
-    ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
-}
+unquoted_string = @{ (ASCII_ALPHANUMERIC | "-" | "." | ":" | "," | "_" | "/" | "$" | "+")+ }
 
-json = _{ SOI ~ (object | array) ~ EOI }
+keyword = @{ (ASCII_ALPHANUMERIC | "-" | "." | ":" | "/" | "@")+ }
+
+top = _{ pairs }
+
+inner_trailing_lines = { "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+trailing_lines = _{ inner_trailing_lines ~ NEWLINE* }
+
+json = { SOI ~ WHITE_SPACE* ~ top ~ WHITE_SPACE* ~ trailing_lines{3} ~ EOI }
