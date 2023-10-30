@@ -1,3 +1,5 @@
+//! Parse a Edge Router VyOS/Vyatta file
+#![allow(missing_docs)]
 use std::unreachable;
 
 use crate::types::{File, ObjectValue};
@@ -6,16 +8,25 @@ use super::types::Value;
 use pest::Parser;
 use pest_derive::Parser;
 
+#[allow(clippy::module_name_repetitions)]
 #[derive(Parser)]
 #[grammar = "json.pest"]
-struct JSONParser;
+struct MyParser;
 
 use pest::error::Error;
 
+/// Parse a Edge Router VyOS/Vyatta file
+///
+/// # Panics
+///
+/// Panics if the function becomes out of sync with the pest file.
+///
+/// # Errors
+///
+/// Returns an error if the file cannot be parsed.
 #[allow(clippy::result_large_err)]
+#[allow(clippy::unwrap_used)]
 pub fn parse_file(file: &str) -> Result<File, Error<Rule>> {
-    let json = JSONParser::parse(Rule::json, file)?.next().unwrap();
-
     use pest::iterators::Pair;
 
     fn parse_value(pair: Pair<Rule>) -> Value {
@@ -81,6 +92,8 @@ pub fn parse_file(file: &str) -> Result<File, Error<Rule>> {
         }
     }
 
+    let json = MyParser::parse(Rule::json, file)?.next().unwrap();
+
     // println!("json: {:?}\n", json);
     // panic!("ssss");
     let mut inner = json.into_inner();
@@ -97,6 +110,7 @@ pub fn parse_file(file: &str) -> Result<File, Error<Rule>> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
     use super::*;
 
     #[test]

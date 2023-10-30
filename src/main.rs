@@ -1,3 +1,10 @@
+//! Test program for edgerouter-rust
+#![warn(missing_docs)]
+#![deny(clippy::pedantic)]
+#![deny(clippy::nursery)]
+#![deny(clippy::unwrap_used)]
+// #![deny(clippy::expect_used)]
+
 use edgerouter_rust::{parser::parse_file, types::File};
 use std::fs;
 
