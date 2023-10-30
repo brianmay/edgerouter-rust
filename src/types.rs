@@ -27,7 +27,8 @@ impl File<'_> {
                 let contents: Vec<_> = o.iter().map(|v| ObjectValue::serialize(v, "")).collect();
                 contents.join("")
             }
-            _ => unreachable!(),
+            // FIXME: Should we actually support cases where the top-level value is not an object?
+            _ => panic!("Top level value is not an object"),
         };
         let mut list = vec![values];
         list.push("".to_string());
